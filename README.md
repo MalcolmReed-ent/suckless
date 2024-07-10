@@ -1,6 +1,6 @@
 # What is this?
 
-My Suckless Build Using dwm + dmenu+ st + nsxiv + fastcompmgr <br />
+My Suckless Build Using dwm + dmenu + st + nsxiv + fastcompmgr <br />
 aka. my "moderately" patched Suckless Tools
 
 # Screenshot
