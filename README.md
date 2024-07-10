@@ -1,6 +1,6 @@
 # What is this?
 
-My Suckless Build Using dwm + st + nsxiv + fastcompmgr <br />
+My Suckless Build Using dwm + dmenu+ st + nsxiv + fastcompmgr <br />
 aka. my "moderately" patched Suckless Tools
 
 # Screenshot
@@ -8,7 +8,7 @@ aka. my "moderately" patched Suckless Tools
 Picture of four st instances separately running fastfetch, cmatrix, nsxiv, neovim, and an background
 ![Alt text](desktop.png)
 
-# DWM
+# DWM-6.4
 
 Differences
 -----------
@@ -34,7 +34,23 @@ dwm-swallow-6.3.diff<br />
 dwm-shiftviewclients-6.2.diff<br />
 dwm-cool-autostart-20240312-9f88553.diff<br />
 
-# NSXIV
+# DMENU-4.9
+
+Differences
+-----------
+I updated the 'dmenu_run' configuration to include Flatpak applications in '/var/lib' and '/.local/share' directories.<br />
+In the 'config.mk' file, I adjusted the 'CFLAGS' setting to '-O0', so it compiles faster.<br />
+I added scripts installation into the 'Makefile' to streamline the build process, so all are compiled together.<br />
+
+
+Scripts
+-------
+dmenu_dfm - A file manager that uses specified xdg-open applications<br />
+dmenu_search - Search the web using a chosen search engine or site<br />
+dmenu_youtube - Find and play YouTube videos via Invidious using mpv<br />
+dmenu_youtube_channels - Browse selected YouTube channels and play videos with mpv<br />
+
+# NSXIV-v30
 
 Version
 -------
