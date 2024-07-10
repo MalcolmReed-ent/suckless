@@ -1,0 +1,39 @@
+dmenu-4.9 - dynamic menu
+====================
+dmenu is an efficient dynamic menu for X.
+
+
+Differences
+-----------
+I updated the 'dmenu_run' configuration to include Flatpak applications in '/var/lib' and '/.local/share' directories.
+In the 'config.mk' file, I adjusted the 'CFLAGS' setting to '-O0', so it compiles faster.
+I added scripts installation into the 'Makefile' to streamline the build process, so all are compiled together.
+
+
+Scripts
+-------
+dmenu_dfm - A file manager that uses specified xdg-open applications
+dmenu_search - Search the web using a chosen search engine or site
+dmenu_youtube - Find and play YouTube videos via Invidious using mpv
+dmenu_youtube_channels - Browse selected YouTube channels and play videos with mpv
+
+
+Requirements
+------------
+In order to build dmenu you need the Xlib header files.
+
+
+Installation
+------------
+Edit config.mk to match your local setup (dmenu is installed into
+the /usr/local namespace by default).
+
+Afterwards enter the following command to build and install dmenu
+(if necessary as root):
+
+    make clean install
+
+
+Running dmenu
+-------------
+See the man page for details.

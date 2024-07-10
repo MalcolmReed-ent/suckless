@@ -1,0 +1,94 @@
+#!/bin/bash
+# deps: jq, curl, dmenu, mpv
+# Description: Simple dmenu invidious search and play script using dmenu and mpv
+
+# Configuration
+instance="iv.ggtyler.dev"
+player="mpv --quiet --ytdl-format='bestvideo[height<=360]+worstaudio/best'"
+
+# Variables
+declare -a types
+declare -a titles
+declare -a videoids
+declare -a authors
+declare -a viewcounts
+declare -a lengthseconds
+declare -a publishedtexts
+
+getdata () {
+    while read -r line; do
+        types+=("$line")
+    done < <(echo "$1" | jq -r '.[].type')
+    while read -r line; do
+        titles+=("$line")
+    done < <(echo "$1" | jq -r '.[].title')
+    while read -r line; do
+        videoids+=("$line")
+    done < <(echo "$1" | jq -r '.[].videoId')
+    while read -r line; do
+        authors+=("$line")
+    done < <(echo "$1" | jq -r '.[].author')
+    while read -r line; do
+        viewcounts+=("$line")
+    done < <(echo "$1" | jq -r '.[].viewCount')
+    while read -r line; do
+        lengthseconds+=("$line")
+    done < <(echo "$1" | jq -r '.[].lengthSeconds')
+    while read -r line; do
+        publishedtexts+=("$line")
+    done < <(echo "$1" | jq -r '.[].publishedText')
+}
+
+printresults () {
+    for ((i=0; i<${#videoids[@]}; i++)); do
+        if [[ "${types[$i]}" == "video" ]] || [[ "${types[$i]}" == "shortVideo" ]]; then
+            echo "$i) ${titles[$i]} [${authors[$i]}] $((${lengthseconds[$i]/60})):$((lengthseconds[$i]%60)) https://${instance}/watch?v=${videoids[$i]} ${viewcounts[$i]} Views - ${publishedtexts[$i]}"
+        fi
+    done
+}
+
+getjsondata () {
+    case "$type" in
+        search) curl -s https://"$instance"/api/v1/search?q="$1" ;;
+        popular) curl -s https://"$instance"/api/v1/popular ;;
+        trending) curl -s https://"$instance"/api/v1/trending ;;
+    esac
+}
+
+getvideos () {
+    string=$(echo "$@" | sed "s/\s/+/g")
+    printf "Getting video data...\n"
+    jsondata=$(getjsondata "$string")
+    getdata "$jsondata"
+    choice=$(printresults | dmenu -l 10 -p "Select video:")
+    index=$(echo "$choice" | cut -d ')' -f 1)
+    if [[ -n "$index" ]] && [[ "$index" =~ ^[0-9]+$ ]]; then
+        eval "$player 'https://${instance}/watch?v=${videoids[$index]}'"
+    else
+        printf "Exiting.\n"
+    fi
+}
+
+usage () {
+    echo "Usage: dmenu_yt <options> <query>
+    Options:
+    --help, -h                  Show usage
+    --search, -s                Search videos (default option)
+    --popular, -p               View popular videos on instance
+    --trending, -t              View trending videos"
+}
+
+# Start with dmenu to select mode
+mode=$(echo -e "Search\nPopular\nTrending" | dmenu -p "Select mode:")
+case "$mode" in
+    "Search")
+        query=$(echo "" | dmenu -p "Enter search query:")
+        [[ -z "$query" ]] && { echo "No query provided, exiting."; exit 1; }
+        type="search" && getvideos "$query" ;;
+    "Popular")
+        type="popular" && getvideos ;;
+    "Trending")
+        type="trending" && getvideos ;;
+    *)
+        echo "Invalid option" && exit 1 ;;
+esac

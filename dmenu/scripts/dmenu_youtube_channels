@@ -1,0 +1,41 @@
+#!/bin/bash
+# Dependencies jq, yt-dlp, mpv
+
+# Define an associative array of channel names and channel IDs
+declare -A channels=(
+    ["Brodie Robertson"]="UCld68syR8Wi-GY_n4CaoJGA"
+)
+
+# Get the selected channel using dmenu
+selected_channel_name=$(printf '%s\n' "${!channels[@]}" | dmenu -l 15 -i -p "Select a YouTube channel:")
+selected_channel_id=${channels[$selected_channel_name]}
+
+# Ensure a channel was selected
+if [ -z "$selected_channel_id" ]; then
+    echo "No channel selected."
+    exit 1
+fi
+
+# Fetch the latest videos from the selected channel and format them as "title - URL"
+video_list=$(yt-dlp -j --flat-playlist "https://www.youtube.com/channel/${selected_channel_id}" | jq -r 'select(.id != null) | .title + " - https://www.youtube.com/watch?v=" + .id')
+
+# Ensure video list is not empty
+if [ -z "$video_list" ]; then
+    echo "No videos found for the selected channel."
+    exit 1
+fi
+
+# Let the user select a video
+selected_video=$(printf '%s\n' "${video_list}" | dmenu -l 15 -i -p "Select a video to play:")
+
+# Ensure a video was selected
+if [ -z "$selected_video" ]; then
+    echo "No video selected."
+    exit 1
+fi
+
+# Directly use the selected video URL from the list without extracting
+selected_video_url="${selected_video##* - }"
+
+# Play the selected video using mpv
+mpv -quiet --ytdl-format="bestvideo[height<=360]+worstaudio/best" --speed=1.00 "${selected_video_url}"
